@@ -1,0 +1,71 @@
+################################################
+#Installation#
+################################################
+#Install ROS Commons:
+sudo apt update
+sudo apt install ros-jazzy-turtlebot4-description \
+ros-jazzy-turtlebot4-msgs \
+ros-jazzy-turtlebot4-navigation \
+ros-jazzy-turtlebot4-node
+
+#Install Nav2 binaries:
+sudo apt install ros-jazzy-navigation2
+sudo apt install ros-jazzy-nav2-bringup
+sudo apt install ros-jazzy-nav2-minimal-tb*
+sudo apt install ros-jazzy-nav2-route #This one is missing from the website
+
+#If you're going to use Gazebo:
+sudo apt-get update
+sudo apt-get install curl lsb-release gnupg
+sudo curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] https://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+sudo apt-get update
+sudo apt-get install ros-jazzy-ros-gz
+
+#Install Turtlebot4 Simulation Packages:
+sudo apt update
+#sudo apt install ros-jazzy-turtlebot4-simulations -y
+sudo apt install ros-jazzy-turtlebot4-simulator ros-jazzy-irobot-create-nodes
+
+#-----------------USING LIVE TURTLEBOT (NOT SIMULATED)------------------#
+
+################################################
+#Generate map#
+################################################
+#New Window - Launch slam toolbox
+ros2 launch turtlebot4_navigation slam.launch.py sync:=false
+
+#New Window - Open Rviz to view:
+ros2 launch turtlebot4_viz view_navigation.launch.py
+
+#New Window -Launch controller for turtlebot (Then drive it around)
+ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -p stamped:=true
+
+#New Window - Save map (Keep slam toolbox running!):
+ros2 service call /slam_toolbox/save_map slam_toolbox/srv/SaveMap "name:
+  data: 'nu_map'"
+
+#################################################
+#After generating map#
+#################################################
+#Ensure turtlebot is properly booted and initialized:
+#New Window - Launch turtlebot4 localization  map(Wait for turtlebot to connect):
+ros2 launch turtlebot4_navigation localization.launch.py map:=nu_map.yaml
+
+#New Window Launch RViz (Should connect with local map)
+ros2 launch turtlebot4_viz view_navigation.launch.py
+
+#New Window - Launch Nav2 (Needed to direct robot)
+ros2 launch turtlebot4_navigation nav2.launch.py
+
+#Set initial pose in RViz.
+#Set goal
+#Watch Robot go!
+
+#----------------USING SIMULATED TURTLEBOT IN GAZEBO-------------------#
+#Run simulator with localization only, Rviz, and Nav2:
+ros2 launch turtlebot4_gz_bringup turtlebot4_gz.launch.py nav2:=true slam:=false localization:=true rviz:=true
+
+#Set initial pose in RViz.
+#Set goal
+#Watch Robot go!

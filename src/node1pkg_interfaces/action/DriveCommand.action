@@ -1,0 +1,10 @@
+# Goal: Request with distance and angle (one must be 0)
+float64 distance  # Distance to move in meters (0 if turning)
+float64 angle     # Angle to turn in radians (0 if moving)
+---
+# Result: Success status (pose will be added later)
+bool success
+string message
+---
+# Feedback: Progress during execution (sensors will be added later)
+float64 progress
